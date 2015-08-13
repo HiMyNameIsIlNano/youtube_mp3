@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Start functions
+# Print out the help
+usage(){
+    echo "usage: youtube_mp3 [[-f FILE [-o OUT_DIR]] | [-h]]"
+}
+# End functions 
+
+# Default output formats
+timestamp=$(date +%s)
+in_dir=${HOME}
+out_dir=/tmp
+default_file=${in_dir}/youtube
+youtube_dl=/usr/local/bin/youtube-dl
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -f | --file )		    shift
+                                file=$1
+                                ;;
+        -o | --out_dir )        shift
+                                out_dir=$1
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+    shift
+done
+
+# If the file with the Id(s) is either not passed or it is passed but it does not exist
+if ["${file}" == "" || ! -f ${file}]
+then
+	file=${default_file}
+	echo "Default configuration file will be read: " ${file}
+fi
+
+cd ${out_dir}
+
+for url_video_id in $(cat ${file}) 
+do 
+	echo "Converting video with Id: " ${url_video_id}
+	${youtube_dl} --extract-audio --audio-format mp3 ${url_video_id}
+done 
